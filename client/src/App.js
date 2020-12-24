@@ -1,10 +1,12 @@
-import Book from './Book';
 import './App.css';
+import Header from './Header';
+import BookLibrary from './BookLibrary';
 
 function App() {
   return (
     <div className="App">
-      <Book />
+      <Header />
+      <BookLibrary />
     </div>
   );
 }
