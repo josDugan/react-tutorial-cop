@@ -1,9 +1,25 @@
 import React from 'react';
 import axios from 'axios';
+import { Redirect } from 'react-router-dom';
 
 import './Book.css';
 
 class Book extends React.Component {
+
+    validation = {
+        author: {
+            rule: /^\S.{0,48}\S$/,
+            message: 'Author field must have 2-50 characters'
+        },
+        title: {
+            rule: /^\S.{0,68}\S$/,
+            message: 'Title field must have 2-70 characters'
+        },
+        published: {
+            rule: /^\d{4}$/,
+            message: 'Published date must be a 4-digit year'
+        }
+    }
 
     constructor(props) {
         super(props);
@@ -27,8 +43,37 @@ class Book extends React.Component {
         });
     }
 
+    validate() {
+
+        
+        for (let field in this.validation) {
+            const rule = this.validation[field].rule;
+            const message = this.validation[field].message;
+            const value = this.state[field];
+            
+            if (!value.match(rule)) {
+                this.showMessage(message);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    showMessage(message) {
+        this.setState({message: message});
+
+        setTimeout(() => {
+            this.setState({message: ''});
+        }, 3000);
+    }
+
     handleSubmit(event) {
         event.preventDefault();
+        
+        if (!this.validate()) {
+            return;
+        }
 
         let { author, title, published } = this.state;
 
@@ -43,13 +88,20 @@ class Book extends React.Component {
         axios.post(process.env.REACT_APP_SERVER_URL, book)
             .then(result => {
                 console.log(result);
+                this.setState({ created: true });
             })
             .catch(error => {
                 console.log(error);
             });
     }
 
+
     render() {
+
+        if (this.state.created) {
+            return <Redirect to="/" />;
+        }
+
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
@@ -60,6 +112,7 @@ class Book extends React.Component {
                     <label htmlFor="published">Published:</label>
                     <input value={this.state.published} onChange={this.handleChange} type="text" name="published" id="published" />
                     <input type="submit" value="Save" />
+                    <div className="message">{this.state.message}</div>
                 </form>
             </div>
         );
