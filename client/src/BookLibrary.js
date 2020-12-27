@@ -1,11 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import './BookLibrary.css';
 
 import axios from 'axios';
 
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import BookTable from './BookTable.js';
 
 class BookLibrary extends React.Component {
 
@@ -15,9 +13,25 @@ class BookLibrary extends React.Component {
         this.state = {
             books: []
         };
+
+        this.handleDelete = this.handleDelete.bind(this);
     }
 
     componentDidMount() {
+        this.refresh();
+    }
+
+    handleDelete(id) {
+        console.log('delete', id);
+
+        if (window.confirm('Really delete this book?')) {
+            axios.delete(process.env.REACT_APP_SERVER_URL + '/' + id)
+                .then(result => this.refresh())
+                .catch(error => console.log(error));
+        }
+    }
+
+    refresh() {
         axios(process.env.REACT_APP_SERVER_URL)
             .then(result => this.setState({ books: result.data }))
             .catch(err => console.log(err));
@@ -26,33 +40,7 @@ class BookLibrary extends React.Component {
     render() {
         console.log('render', this.state.books);
 
-        let books = this.state.books.map((book) => {
-
-            let date = book.published.substr(0, 4);
-            
-            return (
-                <tr key={book.id}>
-                    <td>{book.title}</td>
-                    <td>{book.author}</td>
-                    <td>{date}</td>
-                    <td><Link to={'/edit/' + book.id}><EditIcon/></Link></td>
-                    <td><DeleteForeverIcon/></td>
-                </tr>
-            );
-        });
-
-        return (
-            <div>
-                <table>
-                    <thead>
-                        <tr><th>Title</th><th>Author</th><th>Published</th></tr>
-                    </thead>
-                    <tbody>
-                        {books}
-                    </tbody>
-                </table>
-            </div>
-        );
+        return <BookTable books={this.state.books} handleDelete={this.handleDelete} />
     }
 }
 
