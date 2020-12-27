@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './BookLibrary.css';
 
 import axios from 'axios';
@@ -34,7 +35,7 @@ class BookLibrary extends React.Component {
                     <td>{book.title}</td>
                     <td>{book.author}</td>
                     <td>{date}</td>
-                    <td><EditIcon/></td>
+                    <td><Link to={'/edit/' + book.id}><EditIcon/></Link></td>
                     <td><DeleteForeverIcon/></td>
                 </tr>
             );

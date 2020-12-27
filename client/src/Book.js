@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { Redirect } from 'react-router-dom';
+import { Redirect, withRouter } from 'react-router-dom';
 import FlashMessage from './FlashMessage';
 
 import './Book.css';
@@ -25,7 +25,10 @@ class Book extends React.Component {
     constructor(props) {
         super(props);
 
+        console.log(props);
+
         this.state = {
+            id: props.match.params.id,
             author: '',
             title: '',
             published: '',
@@ -34,6 +37,27 @@ class Book extends React.Component {
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    componentDidMount() {
+        if (!this.state.id) {
+            return;
+        }
+
+        axios.get(process.env.REACT_APP_SERVER_URL + '/' + this.state.id)
+            .then(result => {
+                console.log(result.data[0]);
+                let { author, title, published } = result.data[0];
+
+                this.setState({
+                    author,
+                    title,
+                    published: published.substr(0, 4)
+                });
+            })
+            .catch(error => {
+                console.log(error);
+            });
     }
 
     handleChange(event) {
@@ -47,14 +71,14 @@ class Book extends React.Component {
 
     validate() {
 
-        
+
         for (let field in this.validation) {
             const rule = this.validation[field].rule;
             const message = this.validation[field].message;
             const value = this.state[field];
-            
+
             if (!value.match(rule)) {
-                this.setState({message: message, submitAttempts: this.state.submitAttempts + 1});
+                this.setState({ message: message, submitAttempts: this.state.submitAttempts + 1 });
                 return false;
             }
         }
@@ -64,22 +88,31 @@ class Book extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        
+
         if (!this.validate()) {
             return;
         }
 
-        let { author, title, published } = this.state;
+        let { id, author, title, published } = this.state;
 
         published += '-01-01';
 
         const book = {
-            author: author,
-            title: title,
-            published: published
+            id,
+            author,
+            title,
+            published
         }
 
-        axios.post(process.env.REACT_APP_SERVER_URL, book)
+        let func = axios.post;
+        let url = process.env.REACT_APP_SERVER_URL;
+
+        if (id) {
+            func = axios.put;
+            url += '/' + id;
+        }
+
+        func(url, book)
             .then(result => {
                 console.log(result);
                 this.setState({ created: true });
@@ -102,15 +135,15 @@ class Book extends React.Component {
                     <label htmlFor="author">Author:</label>
                     <input value={this.state.author} onChange={this.handleChange} type="text" name="author" id="author" />
                     <label htmlFor="title">Title:</label>
-                    <input value={this.state.titler} onChange={this.handleChange} type="text" name="title" id="title" />
+                    <input value={this.state.title} onChange={this.handleChange} type="text" name="title" id="title" />
                     <label htmlFor="published">Published:</label>
                     <input value={this.state.published} onChange={this.handleChange} type="text" name="published" id="published" />
                     <input type="submit" value="Save" />
-                    <FlashMessage key={this.state.submitAttempts} message={this.state.message} duration='3000'/>
+                    <FlashMessage key={this.state.submitAttempts} message={this.state.message} duration='3000' />
                 </form>
             </div>
         );
     }
 }
 
-export default Book;
+export default withRouter(Book);
