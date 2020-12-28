@@ -1,23 +1,18 @@
-table {
-    border-spacing: 3em 1em;
+.loading, .error {
     margin-top: 3em;
-    margin-left: auto;
-    margin-right: auto;
+    text-align: center;
+    font-size: 1.5em;
 }
 
-th {
-    text-align: left;
-    padding-bottom: 1em;
+.error {
+    color: red;
+    font-weight: bold;
 }
 
-td:nth-child(1) {
-    font-style: italic;
-}
-
-td:nth-child(2) {
-    font-weight: 350;
-}
-
-svg {
-    color: rgba(0, 0, 0, 0.616);
+.book-library .message {
+    font-weight: bold;
+    height: 2em;
+    color: red;
+    text-align: center;
+    margin-top: 1em;
 }
